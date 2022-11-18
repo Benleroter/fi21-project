@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% load crispy_forms_filters %}
+{% block header %}
+    <h1 style="color:white;">
+        {% if "Deadly" in CulinaryRating or "deadly" in CulinaryRating %}
+            <img src="/media/images/icons8-skull-and-crossbones-48-red.png" alt="/default.jpg"/>
+        {% elif  "Poisonous" in CulinaryRating or  "poisonous" in CulinaryRating %}
+            <img src="/media/images/icons8-skull-and-crossbones-48.png" alt="/default.jpg"/>
+        {% endif %}
+        {% if "Edible" in CulinaryRating %}
+            <img src="/media/images/icons8-dining-room-64-white-2.png" alt="/default.jpg"/>
+        {% endif %}
+        {% if "Inedible" in CulinaryRating %}
+            <img src="/media/images/icons8-dining-room-64-white-5.png" alt="/default.jpg"/>
+        {% endif %}
+        {% if "medicinal" in CulinaryRating %}
+            <img src="/media/images/icons8-medicine-64.png" alt="Hipocrates">
+        {% endif %}
+        {% if object.CommonName == "Common Name" %}
+            <em>{{ object.LatinName }}</em>, id: {{ object.id }}
+        {% endif %}
+        {% if object.CommonName != "Common Name" %}
+            {% if user.show.ShowLatinNames %}
+                {{ object.CommonName }}, <em>{{ object.LatinName }}</em>, id {{ object.id }}
+            {% else %}
+                {{ object.CommonName }}
+            {% endif %}
+        {% endif %}
+        {% if object.UKSpecies == "Yes" %}
+            <img src="/media/images/pngfind.com-english-flag-png-6458760.png" alt="/default.jpg"/>
+        {% endif %}
+    </h1>
+{% endblock header %}
+{% block DetailBlock %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {% for hidden_field in form.hidden_fields %}
+            {{ hidden_field.errors }}
+            {{ hidden_field }}
+        {% endfor %}
+        {% csrf_token %}
+        {{ form.management_form }}
+        {{ form.non_form_errors }}
+        <div class="detail">
+            <h3>
+                <label class="sub-content">References - edit or add</label>
+            </h3>
+            {% for fungi_references_form in form.forms %}
+                <h4>
+                    {% if fungi_references_form.instance.id %}
+                    {% else %}
+                        {% if fungi_references_form.forms|length > 1 %}
+                            Add another Reference
+                        {% else %}
+                            Add a Reference
+                        {% endif %}
+                    {% endif %}
+                </h4>
+                {% for hidden_field in fungi_references_form.hidden_fields %}
+                    {{ hidden_field.errors }}
+                {% endfor %}
+                {{ refs.non_field_errors }}
+                <div class="sub-content">
+                    <h4>
+                        {{ fungi_references_form|crispy }}
+                    </h4>
+                </div>
+            {% endfor %}
+            <p>
+                <button type="submit" class="btn btn-success">Update Reference</button>
+                <a href="{{ fungi.get_absolute_url }}" role="button" class="btn btn-success">Cancel</a>
+            </p>
+        </div>
+    </form>
+{% endblock DetailBlock %}
