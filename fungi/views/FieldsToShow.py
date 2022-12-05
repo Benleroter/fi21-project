@@ -1,26 +1,24 @@
-from django import forms 
-#from fungi.views.choices import *
-#from fungi.views.choices2 import *
+from django import forms
+# from fungi.views.choices import *
+# from fungi.views.choices2 import *
 from fungi.choices import *
-#from .choices2 import GillChoices
-
 
 def fields_to_show(user_search_fields):
     fields_to_show_dict = {}
 
     if user_search_fields.CommonName:
         fields_to_show_dict['CommonName'] = forms.CharField(required=False, max_length=255, label='Common Name', initial='cn')
-        #print('fieldsToDisplay:::::::::::',fieldsToDisplay)
+        # print('fieldsToDisplay:::::::::::',fieldsToDisplay)
 
     if user_search_fields.LatinName:
         fields_to_show_dict['LatinName'] = forms.CharField(required=False, max_length=255, label='Latin Name', initial='')
 
     if user_search_fields.Group:
         fields_to_show_dict['Group'] = forms.CharField(required=False, max_length=255, label='Group', initial='')
-        #print('fieldsToDisplay:::::::::::',  fields_to_show_dict['Group'])
+        # print('fieldsToDisplay:::::::::::',  fields_to_show_dict['Group'])
     if user_search_fields.HabitatAssociations:
         fields_to_show_dict['HabitatAssociations'] = forms.CharField(required=False, max_length=255, label='Associated Trees', initial='')
-                     
+
     if user_search_fields.HabitatPh:
         fields_to_show_dict['HabitatPh'] = forms.ChoiceField(choices=PhTypeChoices, required=False, label='Ph', initial='')
 
@@ -38,7 +36,7 @@ def fields_to_show(user_search_fields):
 
     if user_search_fields.CapColour:
         fields_to_show_dict['CapColour'] = forms.CharField(required=False, max_length=255, label='Cap Colour', initial='')
- 
+
     if user_search_fields.CapShape:
         fields_to_show_dict['CapShape'] = forms.CharField(required=False, max_length=255, label='Cap Shape', initial='')
 
@@ -77,7 +75,7 @@ def fields_to_show(user_search_fields):
 
     if user_search_fields.StipeReticulationPresent:
         fields_to_show_dict['StipeReticulationPresent'] = forms.ChoiceField(choices=ReticulationChoices, required=False, label='Stipe Reticutaion Present', initial='')
- 
+
     if user_search_fields.StipeReticulation:
         fields_to_show_dict['StipeReticulation'] = forms.CharField(required=False, max_length=255, label='Reticulation', initial='')
 
@@ -119,7 +117,7 @@ def fields_to_show(user_search_fields):
 
     if user_search_fields.GillsColour:
         fields_to_show_dict['GillsColour'] = forms.CharField(required=False, max_length=255, label='Gills Colour', initial='')
- 
+
     if user_search_fields.GillsBruiseColour:
         fields_to_show_dict['GillsBruiseColour'] = forms.CharField(required=False, max_length=255, label='Gills Bruise Colour', initial='')
 
@@ -176,7 +174,7 @@ def fields_to_show(user_search_fields):
 
     if user_search_fields.SubClass:
         fields_to_show_dict['SubClass'] = forms.CharField(required=False, max_length=255, label='Taxonmic SubClass', initial='')
- 
+
     if user_search_fields.Order:
         fields_to_show_dict['Order'] = forms.CharField(required=False, max_length=255, label='Taxonmic Order', initial='')
 
@@ -191,7 +189,7 @@ def fields_to_show(user_search_fields):
 
     if user_search_fields.CulinaryRating:
         fields_to_show_dict['CulinaryRating'] = forms.ChoiceField(choices=CulinaryRatingChoices, required=False, label='Culinary Rating', initial='')
-        #fieldsToDisplay['CulinaryRating'] = forms.CharField(required=False, max_length=255, label='Culinary Rating', initial='')
+        # fieldsToDisplay['CulinaryRating'] = forms.CharField(required=False, max_length=255, label='Culinary Rating', initial='')
 
     if user_search_fields.Odour:
         fields_to_show_dict['Odour'] = forms.CharField(required=False, max_length=255, label='Odour', initial='')

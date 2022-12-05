@@ -9,10 +9,10 @@ def insertglossarylinks(sectiontext):
     alreadyinlist = []
     allitems = []
     termfound = False
-    #print('seciontext', sectiontext)
+    # print('seciontext', sectiontext)
     # loop through Glossary, if glossary term in text from DB get start/end indexes of term in text
     splittext = sectiontext.split()
-    #c = 0
+    gt = "Term not found"
     try:
         for glossaryterm in glossary:
             gt = glossaryterm.Term
@@ -24,7 +24,7 @@ def insertglossarylinks(sectiontext):
                 termfound = True
                 pathandtext = [reverse('glossary_entry', args=[gt]), splittext[idx]]
                 sublist = [idx, pathandtext]
-                #print('pathandtext = ', pathandtext)
+                # print('pathandtext = ', pathandtext)
                 itemlist.append(sublist)
 
     except Exception as e:
@@ -51,7 +51,7 @@ def insertglossarylinks(sectiontext):
 
     for items in sorteditemlist:
         if items[0] in alreadyinlist:
-            sorteditemsdict['link'+str(items[0])] = items[1]
+            sorteditemsdict['link' + str(items[0])] = items[1]
         else:
             sorteditemsdict['item' + str(items[0])] = items[1]
 

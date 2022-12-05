@@ -1,4 +1,3 @@
-from fungi.models import Fungi
 from fungi.models import *
 from django.db.models import Q
 from django.apps import apps
@@ -6,7 +5,7 @@ from django.apps import apps
 import collections
 
 
-def RunSearch(q_params):
+def run_search(q_params):
     # FoundList = []
     # QueryComponents = {}
     qclist = []
@@ -18,14 +17,14 @@ def RunSearch(q_params):
     commonnameslist2 = []
 
     # SearchModels =[]
-    searchtermsCount = 0
-    Matches = []
+    searchterms_count = 0
+    matches = []
 
     print('q_params =', q_params)
 
     for p in q_params:
-        searchtermsCount += 1
-        print('searchtermsCount =', str(searchtermsCount))
+        searchterms_count += 1
+        # print('searchterms_count =', str(searchterms_count))
 
     print('q_params-runsearch', q_params)
 
@@ -49,11 +48,11 @@ def RunSearch(q_params):
             othercommonnamesdict['column'] = 'AltCommonName'
             othercommonnamesdict['qstr'] = '__icontains'
             othercommonnamesdict['model'] = apps.get_model(app_label='fungi', model_name=othercommonnamesdict['table'])
-            othercommonnames_list = othercommonnamesdict['model'].objects.filter(Q(**{othercommonnamesdict['column']+othercommonnamesdict['qstr'] :searchterm}))
+            othercommonnames_list = othercommonnamesdict['model'].objects.filter(Q(**{othercommonnamesdict['column'] + othercommonnamesdict['qstr']: searchterm}))
             for other_name in othercommonnames_list:
                 if other_name.Fungi_id not in resultslist:
                     resultslist.append(other_name.Fungi_id)
-                    commonnameslist.append((other_name.Fungi_id))
+                    commonnameslist.append(other_name.Fungi_id)
 
         elif i == "OtherCommonNames":
             othercommonnamesdict = {}
@@ -63,8 +62,8 @@ def RunSearch(q_params):
             othercommonnamesdict['qstr'] = '__icontains'
             othercommonnamesdict['model'] = apps.get_model(app_label='fungi', model_name=othercommonnamesdict['table'])
             othercommonnames_list = othercommonnamesdict['model'].objects.filter(Q(**{othercommonnamesdict['column'] + othercommonnamesdict['qstr']: othercommonnamesdict['searchterm']}))
-            for i in othercommonnames_list:
-                resultslist.append(i.Fungi_id)
+            for ocn in othercommonnames_list:
+                resultslist.append(ocn.Fungi_id)
 
 
         elif i == "LatinName":
@@ -97,9 +96,9 @@ def RunSearch(q_params):
             latinsynonymsdict['qstr'] = '__icontains'
             latinsynonymsdict['model'] = apps.get_model(app_label='fungi', model_name=latinsynonymsdict['table'])
             latinsynonyms_list = latinsynonymsdict['model'].objects.filter(Q(**{latinsynonymsdict['column'] + latinsynonymsdict['qstr']: latinsynonymsdict['searchterm']}))
-            for i in latinsynonyms_list:
-                resultslist.append(i.Fungi_id)
-                synonymlist.append(i.Fungi_id)
+            for l in latinsynonyms_list:
+                resultslist.append(l.Fungi_id)
+                synonymlist.append(l.Fungi_id)
 
 
 
@@ -111,8 +110,8 @@ def RunSearch(q_params):
             groupdict['qstr'] = '__icontains'
             groupdict['model'] = apps.get_model(app_label='fungi', model_name='Fungi')
             groupdict_list = groupdict['model'].objects.filter(Q(**{groupdict['column'] + groupdict['qstr']: groupdict['searchterm']}))
-            for i in groupdict_list:
-                resultslist.append(i.id)
+            for gd in groupdict_list:
+                resultslist.append(gd.id)
 
 
         elif i == "HabitatAssociations":
@@ -125,8 +124,8 @@ def RunSearch(q_params):
 
             qclist.append(habitatassociationsdict)
             habitat_list = habitatassociationsdict['model'].objects.filter(Q(**{habitatassociationsdict['column'] + habitatassociationsdict['qstr']: habitatassociationsdict['searchterm']}))
-            for i in habitat_list:
-                resultslist.append(i.Fungi_id)
+            for hl in habitat_list:
+                resultslist.append(hl.Fungi_id)
 
         elif i == "HabitatPh":
             habitatphdict = {}
@@ -136,8 +135,8 @@ def RunSearch(q_params):
             habitatphdict['qstr'] = '__icontains'
             habitatphdict['model'] = apps.get_model(app_label='fungi', model_name='Habitat')
             habitatph_list = habitatphdict['model'].objects.filter(Q(**{habitatphdict['column'] + habitatphdict['qstr']: habitatphdict['searchterm']}))
-            for i in habitatph_list:
-                resultslist.append(i.Fungi_id)
+            for hph in habitatph_list:
+                resultslist.append(hph.Fungi_id)
 
         elif i == "HabitatSoil":
             habitatsoildict = {}
@@ -147,8 +146,8 @@ def RunSearch(q_params):
             habitatsoildict['qstr'] = '__icontains'
             habitatsoildict['model'] = apps.get_model(app_label='fungi', model_name='Habitat')
             habitatsoil_list = habitatsoildict['model'].objects.filter(Q(**{habitatsoildict['column'] + habitatsoildict['qstr']: habitatsoildict['searchterm']}))
-            for i in habitatsoil_list:
-                resultslist.append(i.Fungi_id)
+            for hsl in habitatsoil_list:
+                resultslist.append(hsl.Fungi_id)
 
         elif i == "HabitatSubstrate":
             habitatsubstratedict = {}
@@ -158,18 +157,19 @@ def RunSearch(q_params):
             habitatsubstratedict['qstr'] = '__icontains'
             habitatsubstratedict['model'] = apps.get_model(app_label='fungi', model_name='Habitat')
             habitatsubstratedict = habitatsubstratedict['model'].objects.filter(Q(**{habitatsubstratedict['column'] + habitatsubstratedict['qstr']: habitatsubstratedict['searchterm']}))
-            for i in habitatsubstratedict:
-                resultslist.append(i.Fungi_id)
+            for hss in habitatsubstratedict:
+                resultslist.append(hss.Fungi_id)
 
         elif i == "HabitatEnvironment":
+            habitatenvironmentdict = {}
             habitatenvironmentdict['searchterm'] = q_params[i]
             habitatenvironmentdict['table'] = 'Habitat'
             habitatenvironmentdict['column'] = 'Environment'
             habitatenvironmentdict['qstr'] = '__icontains'
             habitatenvironmentdict['model'] = apps.get_model(app_label='fungi', model_name='Habitat')
             habitatenvironmentdict = habitatenvironmentdict['model'].objects.filter(Q(**{habitatenvironmentdict['column'] + habitatenvironmentdict['qstr']: habitatenvironmentdict['searchterm']}))
-            for i in habitatenvironmentdict:
-                resultslist.append(i.Fungi_id)
+            for he in habitatenvironmentdict:
+                resultslist.append(he.Fungi_id)
 
         elif i == "Season":
             seasondict = {}
@@ -180,8 +180,8 @@ def RunSearch(q_params):
             seasondict['model'] = apps.get_model(app_label='fungi', model_name='Seasons')
             qclist.append(seasondict)
             season_list = seasondict['model'].objects.filter(Q(**{seasondict['column'] + seasondict['qstr']: seasondict['searchterm']}))
-            for i in season_list:
-                resultslist.append(i.Fungi_id)
+            for sl in season_list:
+                resultslist.append(sl.Fungi_id)
 
         elif i == "CapColour":
             capcolourdict = {}
@@ -191,8 +191,8 @@ def RunSearch(q_params):
             capcolourdict['qstr'] = '__icontains'
             capcolourdict['model'] = apps.get_model(app_label='fungi', model_name=capcolourdict['table'])
             capcolour_list = capcolourdict['model'].objects.filter(Q(**{capcolourdict['column'] + capcolourdict['qstr']: capcolourdict['searchterm']}))
-            for i in capcolour_list:
-                resultslist.append(i.Fungi_id)
+            for cc in capcolour_list:
+                resultslist.append(cc.Fungi_id)
 
         elif i == "CapShape":
             capshapedict = {}
@@ -202,8 +202,8 @@ def RunSearch(q_params):
             capshapedict['qstr'] = '__icontains'
             capshapedict['model'] = apps.get_model(app_label='fungi', model_name=capshapedict['table'])
             capshape_list = capshapedict['model'].objects.filter(Q(**{capshapedict['column'] + capshapedict['qstr']: capshapedict['searchterm']}))
-            for i in capshape_list:
-                resultslist.append(i.Fungi_id)
+            for cs in capshape_list:
+                resultslist.append(cs.Fungi_id)
 
         elif i == "CapRim":
             caprimdict = {}
@@ -213,8 +213,8 @@ def RunSearch(q_params):
             caprimdict['qstr'] = '__icontains'
             caprimdict['model'] = apps.get_model(app_label='fungi', model_name=caprimdict['table'])
             caprim_list = caprimdict['model'].objects.filter(Q(**{caprimdict['column'] + caprimdict['qstr']: caprimdict['searchterm']}))
-            for i in caprim_list:
-                resultslist.append(i.Fungi_id)
+            for cr in caprim_list:
+                resultslist.append(cr.Fungi_id)
 
         elif i == "CapTexture":
             captexturedict = {}
@@ -224,8 +224,8 @@ def RunSearch(q_params):
             captexturedict['qstr'] = '__icontains'
             captexturedict['model'] = apps.get_model(app_label='fungi', model_name=captexturedict['table'])
             captexture_list = captexturedict['model'].objects.filter(Q(**{captexturedict['column'] + captexturedict['qstr']: captexturedict['searchterm']}))
-            for i in captexture_list:
-                resultslist.append(i.Fungi_id)
+            for ct in captexture_list:
+                resultslist.append(ct.Fungi_id)
 
         elif i == "CapBruiseColour":
             capbruisecolourdict = {}
@@ -237,8 +237,8 @@ def RunSearch(q_params):
 
             qclist.append(capbruisecolourdict)
             capbruisecolour_list = capbruisecolourdict['model'].objects.filter(Q(**{capbruisecolourdict['column'] + capbruisecolourdict['qstr']: capbruisecolourdict['searchterm']}))
-            for i in capbruisecolour_list:
-                resultslist.append(i.Fungi_id)
+            for cbc in capbruisecolour_list:
+                resultslist.append(cbc.Fungi_id)
 
         elif i == "CapCutColour":
             capcutcolourdict = {}
@@ -250,8 +250,8 @@ def RunSearch(q_params):
 
             qclist.append(capcutcolourdict)
             capcutcolour_list = capcutcolourdict['model'].objects.filter(Q(**{capcutcolourdict['column'] + capcutcolourdict['qstr']: capcutcolourdict['searchterm']}))
-            for i in capcutcolour_list:
-                resultslist.append(i.Fungi_id)
+            for ccc in capcutcolour_list:
+                resultslist.append(ccc.Fungi_id)
 
         elif i == "CapWidth":
             capwidthdict = {}
@@ -263,8 +263,8 @@ def RunSearch(q_params):
             capwidthdict['qstr2'] = '__gte'
             capwidthdict['model'] = apps.get_model(app_label='fungi', model_name=capwidthdict['table'])
             capwidth_list = capwidthdict['model'].objects.filter(Q(**{capwidthdict['column1'] + capwidthdict['qstr1']: capwidthdict['searchterm']}) & Q(**{capwidthdict['column2'] + capwidthdict['qstr2']: capwidthdict['searchterm']}))
-            for i in capwidth_list:
-                resultslist.append(i.Fungi_id)
+            for cw in capwidth_list:
+                resultslist.append(cw.Fungi_id)
 
         elif i == "StipeColour":
             stipecolourdict = {}
@@ -276,8 +276,8 @@ def RunSearch(q_params):
 
             qclist.append(stipecolourdict)
             stipecolour_list = stipecolourdict['model'].objects.filter(Q(**{stipecolourdict['column'] + stipecolourdict['qstr']: stipecolourdict['searchterm']}))
-            for i in stipecolour_list:
-                resultslist.append(i.Fungi_id)
+            for sc in stipecolour_list:
+                resultslist.append(sc.Fungi_id)
 
         elif i == "StipeBruiseColour":
             stipebruisecolourdict = {}
@@ -289,8 +289,8 @@ def RunSearch(q_params):
 
             qclist.append(stipebruisecolourdict)
             stipebruisecolour_list = stipebruisecolourdict['model'].objects.filter(Q(**{stipebruisecolourdict['column'] + stipebruisecolourdict['qstr']: stipebruisecolourdict['searchterm']}))
-            for i in stipebruisecolour_list:
-                resultslist.append(i.Fungi_id)
+            for sbc in stipebruisecolour_list:
+                resultslist.append(sbc.Fungi_id)
 
         elif i == "StipeCutColour":
             stipecutcolourdict = {}
@@ -302,8 +302,8 @@ def RunSearch(q_params):
 
             qclist.append(stipecutcolourdict)
             stipecutcolour_list = stipecutcolourdict['model'].objects.filter(Q(**{stipecutcolourdict['column'] + stipecutcolourdict['qstr']: stipecutcolourdict['searchterm']}))
-            for i in stipecutcolour_list:
-                resultslist.append(i.Fungi_id)
+            for scc in stipecutcolour_list:
+                resultslist.append(scc.Fungi_id)
 
         elif i == "StipeLength":
             stipelengthdict = {}
@@ -317,8 +317,8 @@ def RunSearch(q_params):
             qclist.append(stipelengthdict)
             stipelength_list = stipelengthdict['model'].objects.filter(
                 Q(**{stipelengthdict['column1'] + stipelengthdict['qstr1']: stipelengthdict['searchterm']}) & Q(**{stipelengthdict['column2'] + stipelengthdict['qstr2']: stipelengthdict['searchterm']}))
-            for i in stipelength_list:
-                resultslist.append(i.Fungi_id)
+            for sl in stipelength_list:
+                resultslist.append(sl.Fungi_id)
 
         elif i == "StipeThickness":
             stipethicknessdict = {}
@@ -332,8 +332,8 @@ def RunSearch(q_params):
             qclist.append(stipethicknessdict)
             stipethickness_list = stipethicknessdict['model'].objects.filter(
                 Q(**{stipethicknessdict['column1'] + stipethicknessdict['qstr1']: stipethicknessdict['searchterm']}) & Q(**{stipethicknessdict['column2'] + stipethicknessdict['qstr2']: stipethicknessdict['searchterm']}))
-            for i in stipethickness_list:
-                resultslist.append(i.Fungi_id)
+            for st in stipethickness_list:
+                resultslist.append(st.Fungi_id)
 
         elif i == "StipeShape":
             stipedescriptiondict = {}
@@ -343,8 +343,8 @@ def RunSearch(q_params):
             stipedescriptiondict['qstr'] = '__icontains'
             stipedescriptiondict['model'] = apps.get_model(app_label='fungi', model_name=stipedescriptiondict['table'])
             stipedescription_list = stipedescriptiondict['model'].objects.filter(Q(**{stipedescriptiondict['column'] + stipedescriptiondict['qstr']: stipedescriptiondict['searchterm']}))
-            for i in stipedescription_list:
-                resultslist.append(i.Fungi_id)
+            for sd in stipedescription_list:
+                resultslist.append(sd.Fungi_id)
 
         elif i == "StipeReticulationPresent":
             stipereticulationpresentdict = {}
@@ -354,8 +354,8 @@ def RunSearch(q_params):
             stipereticulationpresentdict['qstr'] = '__icontains'
             stipereticulationpresentdict['model'] = apps.get_model(app_label='fungi', model_name=stipereticulationpresentdict['table'])
             stipereticulationpresent_list = stipereticulationpresentdict['model'].objects.filter(Q(**{stipereticulationpresentdict['column'] + stipereticulationpresentdict['qstr']: stipereticulationpresentdict['searchterm']}))
-            for i in stipereticulationpresent_list:
-                resultslist.append(i.Fungi_id)
+            for srp in stipereticulationpresent_list:
+                resultslist.append(srp.Fungi_id)
 
         elif i == "StipeReticulation":
             stipereticulationdict = {}
@@ -365,8 +365,8 @@ def RunSearch(q_params):
             stipereticulationdict['qstr'] = '__icontains'
             stipereticulationdict['model'] = apps.get_model(app_label='fungi', model_name=stipereticulationdict['table'])
             stipereticulation_list = stipereticulationdict['model'].objects.filter(Q(**{stipereticulationdict['column'] + stipereticulationdict['qstr']: stipereticulationdict['searchterm']}))
-            for i in stipereticulation_list:
-                resultslist.append(i.Fungi_id)
+            for sr in stipereticulation_list:
+                resultslist.append(sr.Fungi_id)
 
 
         elif i == "StipeBase":
@@ -377,8 +377,8 @@ def RunSearch(q_params):
             stipebasedict['qstr'] = '__icontains'
             stipebasedict['model'] = apps.get_model(app_label='fungi', model_name=stipebasedict['table'])
             stipebase_list = stipebasedict['model'].objects.filter(Q(**{stipebasedict['column'] + stipebasedict['qstr']: stipebasedict['searchterm']}))
-            for i in stipebase_list:
-                resultslist.append(i.Fungi_id)
+            for sb in stipebase_list:
+                resultslist.append(sb.Fungi_id)
 
         elif i == "StipeTexture":
             stipetexturedict = {}
@@ -388,8 +388,8 @@ def RunSearch(q_params):
             stipetexturedict['qstr'] = '__icontains'
             stipetexturedict['model'] = apps.get_model(app_label='fungi', model_name=stipetexturedict['table'])
             stipetexture_list = stipetexturedict['model'].objects.filter(Q(**{stipetexturedict['column'] + stipetexturedict['qstr']: stipetexturedict['searchterm']}))
-            for i in stipetexture_list:
-                resultslist.append(i.Fungi_id)
+            for stx in stipetexture_list:
+                resultslist.append(stx.Fungi_id)
 
         elif i == "StipeRing":
             stiperingdict = {}
@@ -398,9 +398,9 @@ def RunSearch(q_params):
             stiperingdict['column'] = 'Ring'
             stiperingdict['qstr'] = '__icontains'
             stiperingdict['model'] = apps.get_model(app_label='fungi', model_name=stiperingdict['table'])
-            stipetexture_list = stiperingdict['model'].objects.filter(Q(**{stiperingdict['column'] + stiperingdict['qstr']: stiperingdict['searchterm']}))
-            for i in stipering_list:
-                resultslist.append(i.Fungi_id)
+            stipering_list = stiperingdict['model'].objects.filter(Q(**{stiperingdict['column'] + stiperingdict['qstr']: stiperingdict['searchterm']}))
+            for sr in stipering_list:
+                resultslist.append(sr.Fungi_id)
 
         elif i == "PoresPresent":
             porespresentdict = {}
@@ -410,8 +410,8 @@ def RunSearch(q_params):
             porespresentdict['qstr'] = '__iexact'
             porespresentdict['model'] = apps.get_model(app_label='fungi', model_name=porespresentdict['table'])
             porespresent_list = porespresentdict['model'].objects.filter(Q(**{porespresentdict['column'] + porespresentdict['qstr']: porespresentdict['searchterm']}))
-            for i in porespresent_list:
-                resultslist.append(i.Fungi_id)
+            for pp in porespresent_list:
+                resultslist.append(pp.Fungi_id)
 
         elif i == "PoreColour":
             porescolourdict = {}
@@ -421,8 +421,8 @@ def RunSearch(q_params):
             porescolourdict['qstr'] = '__icontains'
             porescolourdict['model'] = apps.get_model(app_label='fungi', model_name=porescolourdict['table'])
             porescolour_list = porescolourdict['model'].objects.filter(Q(**{porescolourdict['column'] + porescolourdict['qstr']: porescolourdict['searchterm']}))
-            for i in porescolour_list:
-                resultslist.append(i.Fungi_id)
+            for pc in porescolour_list:
+                resultslist.append(pc.Fungi_id)
 
         elif i == "PoreShape":
             poresshapedict = {}
@@ -432,8 +432,8 @@ def RunSearch(q_params):
             poresshapedict['qstr'] = '__icontains'
             poresshapedict['model'] = apps.get_model(app_label='fungi', model_name=poresshapedict['table'])
             poresshape_list = poresshapedict['model'].objects.filter(Q(**{poresshapedict['column'] + poresshapedict['qstr']: poresshapedict['searchterm']}))
-            for i in poresshape_list:
-                resultslist.append(i.Fungi_id)
+            for ps in poresshape_list:
+                resultslist.append(ps.Fungi_id)
 
         elif i == "PoreBruiseColour":
             poresbruisecolourdict = {}
@@ -443,8 +443,8 @@ def RunSearch(q_params):
             poresbruisecolourdict['qstr'] = '__icontains'
             poresbruisecolourdict['model'] = apps.get_model(app_label='fungi', model_name=poresbruisecolourdict['table'])
             poresbruisecolour_list = poresbruisecolourdict['model'].objects.filter(Q(**{poresbruisecolourdict['column'] + poresbruisecolourdict['qstr']: poresbruisecolourdict['searchterm']}))
-            for i in poresbruisecolour_list:
-                resultslist.append(i.Fungi_id)
+            for pbc in poresbruisecolour_list:
+                resultslist.append(pbc.Fungi_id)
 
         elif i == "TubeColour":
             tubecolourdict = {}
@@ -454,8 +454,8 @@ def RunSearch(q_params):
             tubecolourdict['qstr'] = '__icontains'
             tubecolourdict['model'] = apps.get_model(app_label='fungi', model_name=tubecolourdict['table'])
             tubecolour_list = tubecolourdict['model'].objects.filter(Q(**{tubecolourdict['column'] + tubecolourdict['qstr']: tubecolourdict['searchterm']}))
-            for i in tubecolour_list:
-                resultslist.append(i.Fungi_id)
+            for tc in tubecolour_list:
+                resultslist.append(tc.Fungi_id)
 
         elif i == "TubeShape":
             tubeshapedict = {}
@@ -465,8 +465,8 @@ def RunSearch(q_params):
             tubeshapedict['qstr'] = '__icontains'
             tubeshapedict['model'] = apps.get_model(app_label='fungi', model_name=tubeshapedict['table'])
             tubeshape_list = tubeshapedict['model'].objects.filter(Q(**{tubeshapedict['column'] + tubeshapedict['qstr']: tubeshapedict['searchterm']}))
-            for i in tubeshape_list:
-                resultslist.append(i.Fungi_id)
+            for ts in tubeshape_list:
+                resultslist.append(ts.Fungi_id)
 
         elif i == "TubeBruiseColour":
             tubebruisecolour = {}
@@ -476,8 +476,8 @@ def RunSearch(q_params):
             tubebruisecolour['qstr'] = '__icontains'
             tubebruisecolour['model'] = apps.get_model(app_label='fungi', model_name=tubebruisecolour['table'])
             tubebruisecolour_list = tubebruisecolour['model'].objects.filter(Q(**{tubebruisecolour['column'] + tubebruisecolour['qstr']: tubebruisecolour['searchterm']}))
-            for i in tubebruisecolour_list:
-                resultslist.append(i.Fungi_id)
+            for tbc in tubebruisecolour_list:
+                resultslist.append(tbc.Fungi_id)
 
         elif i == "PoreMilk":
             poremilkdict = {}
@@ -487,8 +487,8 @@ def RunSearch(q_params):
             poremilkdict['qstr'] = '__icontains'
             poremilkdict['model'] = apps.get_model(app_label='fungi', model_name=poremilkdict['table'])
             poremilk_list = poremilkdict['model'].objects.filter(Q(**{poremilkdict['column'] + poremilkdict['qstr']: poremilkdict['searchterm']}))
-            for i in poremilk_list:
-                resultslist.append(i.Fungi_id)
+            for pm in poremilk_list:
+                resultslist.append(pm.Fungi_id)
 
         elif i == "GillsPresent":
             gillspresentdict = {}
@@ -498,8 +498,8 @@ def RunSearch(q_params):
             gillspresentdict['qstr'] = '__iexact'
             gillspresentdict['model'] = apps.get_model(app_label='fungi', model_name=gillspresentdict['table'])
             gillspresent_list = gillspresentdict['model'].objects.filter(Q(**{gillspresentdict['column'] + gillspresentdict['qstr']: gillspresentdict['searchterm']}))
-            for i in gillspresent_list:
-                resultslist.append(i.Fungi_id)
+            for gp in gillspresent_list:
+                resultslist.append(gp.Fungi_id)
 
         elif i == "GillsColour":
             gillscolourdict = {}
@@ -509,8 +509,8 @@ def RunSearch(q_params):
             gillscolourdict['qstr'] = '__icontains'
             gillscolourdict['model'] = apps.get_model(app_label='fungi', model_name=gillscolourdict['table'])
             gillscolour_list = gillscolourdict['model'].objects.filter(Q(**{gillscolourdict['column'] + gillscolourdict['qstr']: gillscolourdict['searchterm']}))
-            for i in gillscolour_list:
-                resultslist.append(i.Fungi_id)
+            for gc in gillscolour_list:
+                resultslist.append(gc.Fungi_id)
 
         elif i == "GillsBruiseColour":
             gillsbruisecolourdict = {}
@@ -520,8 +520,8 @@ def RunSearch(q_params):
             gillsbruisecolourdict['qstr'] = '__icontains'
             gillsbruisecolourdict['model'] = apps.get_model(app_label='fungi', model_name=gillsbruisecolourdict['table'])
             gillsbruisecolour_list = gillsbruisecolourdict['model'].objects.filter(Q(**{gillsbruisecolourdict['column'] + gillsbruisecolourdict['qstr']: gillsbruisecolourdict['searchterm']}))
-            for i in gillsbruisecolour_list:
-                resultslist.append(i.Fungi_id)
+            for gbc in gillsbruisecolour_list:
+                resultslist.append(gbc.Fungi_id)
 
         elif i == "GillsCutColour":
             gillscutcolourdict = {}
@@ -531,8 +531,8 @@ def RunSearch(q_params):
             gillscutcolourdict['qstr'] = '__icontains'
             gillscutcolourdict['model'] = apps.get_model(app_label='fungi', model_name=gillscutcolourdict['table'])
             gillscutcolour_list = gillscutcolourdict['model'].objects.filter(Q(**{gillscutcolourdict['column'] + gillscutcolourdict['qstr']: gillscutcolourdict['searchterm']}))
-            for i in gillscutcolour_list:
-                resultslist.append(i.Fungi_id)
+            for gcc in gillscutcolour_list:
+                resultslist.append(gcc.Fungi_id)
 
         elif i == "GillsAttachment":
             gillsattachmentdict = {}
@@ -542,8 +542,8 @@ def RunSearch(q_params):
             gillsattachmentdict['qstr'] = '__icontains'
             gillsattachmentdict['model'] = apps.get_model(app_label='fungi', model_name=gillsattachmentdict['table'])
             gillsattachment_list = gillsattachmentdict['model'].objects.filter(Q(**{gillsattachmentdict['column'] + gillsattachmentdict['qstr']: gillsattachmentdict['searchterm']}))
-            for i in gillsattachment_list:
-                resultslist.append(i.Fungi_id)
+            for ga in gillsattachment_list:
+                resultslist.append(ga.Fungi_id)
 
         elif i == "GillsArrangement":
             gillsarrangementdict = {}
@@ -553,8 +553,8 @@ def RunSearch(q_params):
             gillsarrangementdict['qstr'] = '__icontains'
             gillsarrangementdict['model'] = apps.get_model(app_label='fungi', model_name=gillsarrangementdict['table'])
             gillsarrangement_list = gillsarrangementdict['model'].objects.filter(Q(**{gillsarrangementdict['column'] + gillsarrangementdict['qstr']: gillsarrangementdict['searchterm']}))
-            for i in gillsarrangement_list:
-                resultslist.append(i.Fungi_id)
+            for ga in gillsarrangement_list:
+                resultslist.append(ga.Fungi_id)
 
         elif i == "GillsMilk":
             gillsmilkdict = {}
@@ -564,8 +564,8 @@ def RunSearch(q_params):
             gillsmilkdict['qstr'] = '__icontains'
             gillsmilkdict['model'] = apps.get_model(app_label='fungi', model_name=gillsmilkdict['table'])
             gillsmilk_list = gillsmilkdict['model'].objects.filter(Q(**{gillsmilkdict['column'] + gillsmilkdict['qstr']: gillsmilkdict['searchterm']}))
-            for i in gillsmilk_list:
-                resultslist.append(i.Fungi_id)
+            for gm in gillsmilk_list:
+                resultslist.append(gm.Fungi_id)
 
         elif i == "FleshCapColour":
             fleshcapcolourdict = {}
@@ -575,8 +575,8 @@ def RunSearch(q_params):
             fleshcapcolourdict['qstr'] = '__icontains'
             fleshcapcolourdict['model'] = apps.get_model(app_label='fungi', model_name=fleshcapcolourdict['table'])
             fleshcapcolour_list = fleshcapcolourdict['model'].objects.filter(Q(**{fleshcapcolourdict['column'] + fleshcapcolourdict['qstr']: fleshcapcolourdict['searchterm']}))
-            for i in fleshcapcolour_list:
-                resultslist.append(i.Fungi_id)
+            for fcc in fleshcapcolour_list:
+                resultslist.append(fcc.Fungi_id)
 
         elif i == "FleshCapBruiseColour":
             fleshcapbruisedolourdict = {}
@@ -586,8 +586,8 @@ def RunSearch(q_params):
             fleshcapbruisedolourdict['qstr'] = '__icontains'
             fleshcapbruisedolourdict['model'] = apps.get_model(app_label='fungi', model_name=fleshcapbruisedolourdict['table'])
             fleshcapbruisecolour_list = fleshcapbruisedolourdict['model'].objects.filter(Q(**{fleshcapbruisedolourdict['column'] + fleshcapbruisedolourdict['qstr']: fleshcapbruisedolourdict['searchterm']}))
-            for i in fleshcapbruisecolour_list:
-                resultslist.append(i.Fungi_id)
+            for fcbc in fleshcapbruisecolour_list:
+                resultslist.append(fcbc.Fungi_id)
 
         elif i == "FleshCapCutColour":
             fleshcapcutcolourdict = {}
@@ -597,8 +597,8 @@ def RunSearch(q_params):
             fleshcapcutcolourdict['qstr'] = '__icontains'
             fleshcapcutcolourdict['model'] = apps.get_model(app_label='fungi', model_name=fleshcapcutcolourdict['table'])
             fleshcapcutcolour_list = fleshcapcutcolourdict['model'].objects.filter(Q(**{fleshcapcutcolourdict['column'] + fleshcapcutcolourdict['qstr']: fleshcapcutcolourdict['searchterm']}))
-            for i in fleshcapcutcolour_list:
-                resultslist.append(i.Fungi_id)
+            for fccc in fleshcapcutcolour_list:
+                resultslist.append(fccc.Fungi_id)
 
         elif i == "FleshStipeColour":
             fleshstipecolourdict = {}
@@ -608,8 +608,8 @@ def RunSearch(q_params):
             fleshstipecolourdict['qstr'] = '__icontains'
             fleshstipecolourdict['model'] = apps.get_model(app_label='fungi', model_name=fleshstipecolourdict['table'])
             fleshstipecolour_list = fleshstipecolourdict['model'].objects.filter(Q(**{fleshstipecolourdict['column'] + fleshstipecolourdict['qstr']: fleshstipecolourdict['searchterm']}))
-            for i in fleshstipecolour_list:
-                resultslist.append(i.Fungi_id)
+            for fsc in fleshstipecolour_list:
+                resultslist.append(fsc.Fungi_id)
 
         elif i == "FleshStipeBruiseColour":
             fleshstipebruisecolourdict = {}
@@ -619,8 +619,8 @@ def RunSearch(q_params):
             fleshstipebruisecolourdict['qstr'] = '__icontains'
             fleshstipebruisecolourdict['model'] = apps.get_model(app_label='fungi', model_name=fleshstipebruisecolourdict['table'])
             fleshstipebruisecolour_list = fleshstipebruisecolourdict['model'].objects.filter(Q(**{fleshstipebruisecolourdict['column'] + fleshstipebruisecolourdict['qstr']: fleshstipebruisecolourdict['searchterm']}))
-            for i in fleshstipebruisecolour_list:
-                resultslist.append(i.Fungi_id)
+            for fsbc in fleshstipebruisecolour_list:
+                resultslist.append(fsbc.Fungi_id)
 
         elif i == "FleshStipeCutColour":
             fleshstipecutcolourdict = {}
@@ -630,19 +630,19 @@ def RunSearch(q_params):
             fleshstipecutcolourdict['qstr'] = '__icontains'
             fleshstipecutcolourdict['model'] = apps.get_model(app_label='fungi', model_name=fleshstipecutcolourdict['table'])
             fleshstipecutcolour_list = fleshstipecutcolourdict['model'].objects.filter(Q(**{fleshstipecutcolourdict['column'] + fleshstipecutcolourdict['qstr']: fleshstipecutcolourdict['searchterm']}))
-            for i in fleshstipecutcolour_list:
-                resultslist.append(i.Fungi_id)
+            for fscc in fleshstipecutcolour_list:
+                resultslist.append(fscc.Fungi_id)
 
         elif i == "SporeColour":
-            SporeColourDict = {}
-            SporeColourDict['searchterm'] = q_params[i]
-            SporeColourDict['table'] = 'Spores'
-            SporeColourDict['column'] = 'Colour'
-            SporeColourDict['qstr'] = '__icontains'
-            SporeColourDict['model'] = apps.get_model(app_label='fungi', model_name=SporeColourDict['table'])
-            sporecolour_list = SporeColourDict['model'].objects.filter(Q(**{SporeColourDict['column'] + SporeColourDict['qstr']: SporeColourDict['searchterm']}))
-            for i in sporecolour_list:
-                resultslist.append(i.Fungi_id)
+            spore_colour_dict = {}
+            spore_colour_dict['searchterm'] = q_params[i]
+            spore_colour_dict['table'] = 'Spores'
+            spore_colour_dict['column'] = 'Colour'
+            spore_colour_dict['qstr'] = '__icontains'
+            spore_colour_dict['model'] = apps.get_model(app_label='fungi', model_name=spore_colour_dict['table'])
+            sporecolour_list = spore_colour_dict['model'].objects.filter(Q(**{spore_colour_dict['column'] + spore_colour_dict['qstr']: spore_colour_dict['searchterm']}))
+            for scl in sporecolour_list:
+                resultslist.append(scl.Fungi_id)
 
         elif i == "Kingdom":
             kingdomdict = {}
@@ -652,8 +652,8 @@ def RunSearch(q_params):
             kingdomdict['qstr'] = '__icontains'
             kingdomdict['model'] = apps.get_model(app_label='fungi', model_name=kingdomdict['table'])
             kingdom_list = kingdomdict['model'].objects.filter(Q(**{kingdomdict['column'] + kingdomdict['qstr']: kingdomdict['searchterm']}))
-            for i in kingdom_list:
-                resultslist.append(i.Fungi_id)
+            for k in kingdom_list:
+                resultslist.append(k.Fungi_id)
 
         elif i == "Phyum":
             phyumdict = {}
@@ -663,8 +663,8 @@ def RunSearch(q_params):
             phyumdict['qstr'] = '__icontains'
             phyumdict['model'] = apps.get_model(app_label='fungi', model_name=phyumdict['table'])
             phyum_list = phyumdict['model'].objects.filter(Q(**{phyumdict['column'] + phyumdict['qstr']: phyumdict['searchterm']}))
-            for i in phyum_list:
-                resultslist.append(i.Fungi_id)
+            for pl in phyum_list:
+                resultslist.append(pl.Fungi_id)
 
         elif i == "SubPhyum":
             subphyumdict = {}
@@ -674,8 +674,8 @@ def RunSearch(q_params):
             subphyumdict['qstr'] = '__icontains'
             subphyumdict['model'] = apps.get_model(app_label='fungi', model_name=subphyumdict['table'])
             subphyum_list = subphyumdict['model'].objects.filter(Q(**{subphyumdict['column'] + subphyumdict['qstr']: subphyumdict['searchterm']}))
-            for i in subphyum_list:
-                resultslist.append(i.Fungi_id)
+            for sp in subphyum_list:
+                resultslist.append(sp.Fungi_id)
 
         elif i == "Class":
             classdict = {}
@@ -685,8 +685,8 @@ def RunSearch(q_params):
             classdict['qstr'] = '__icontains'
             classdict['model'] = apps.get_model(app_label='fungi', model_name=classdict['table'])
             class_list = classdict['model'].objects.filter(Q(**{classdict['column'] + classdict['qstr']: classdict['searchterm']}))
-            for i in class_list:
-                resultslist.append(i.Fungi_id)
+            for cl in class_list:
+                resultslist.append(cl.Fungi_id)
 
         elif i == "SubClass":
             subclassdict = {}
@@ -696,8 +696,8 @@ def RunSearch(q_params):
             subclassdict['qstr'] = '__icontains'
             subclassdict['model'] = apps.get_model(app_label='fungi', model_name=subclassdict['table'])
             subclass_list = subclassdict['model'].objects.filter(Q(**{subclassdict['column'] + subclassdict['qstr']: subclassdict['searchterm']}))
-            for i in subclass_list:
-                resultslist.append(i.Fungi_id)
+            for scl in subclass_list:
+                resultslist.append(scl.Fungi_id)
 
         elif i == "Order":
             orderdict = {}
@@ -707,8 +707,8 @@ def RunSearch(q_params):
             orderdict['qstr'] = '__icontains'
             orderdict['model'] = apps.get_model(app_label='fungi', model_name=orderdict['table'])
             order_list = orderdict['model'].objects.filter(Q(**{orderdict['column'] + orderdict['qstr']: orderdict['searchterm']}))
-            for i in order_list:
-                resultslist.append(i.Fungi_id)
+            for ol in order_list:
+                resultslist.append(ol.Fungi_id)
 
         elif i == "Family":
             familydict = {}
@@ -718,8 +718,8 @@ def RunSearch(q_params):
             familydict['qstr'] = '__icontains'
             familydict['model'] = apps.get_model(app_label='fungi', model_name=familydict['table'])
             family_list = familydict['model'].objects.filter(Q(**{familydict['column'] + familydict['qstr']: familydict['searchterm']}))
-            for i in family_list:
-                resultslist.append(i.Fungi_id)
+            for fl in family_list:
+                resultslist.append(fl.Fungi_id)
 
         elif i == "Genus":
             genusdict = {}
@@ -729,8 +729,8 @@ def RunSearch(q_params):
             genusdict['qstr'] = '__icontains'
             genusdict['model'] = apps.get_model(app_label='fungi', model_name=genusdict['table'])
             genus_list = genusdict['model'].objects.filter(Q(**{genusdict['column'] + genusdict['qstr']: genusdict['searchterm']}))
-            for i in genus_list:
-                resultslist.append(i.Fungi_id)
+            for gl in genus_list:
+                resultslist.append(gl.Fungi_id)
 
 
         elif i == "PoisonType":
@@ -741,8 +741,8 @@ def RunSearch(q_params):
             poisontypedict['qstr'] = '__icontains'
             poisontypedict['model'] = apps.get_model(app_label='fungi', model_name=poisontypedict['table'])
             poisontype_list = poisontypedict['model'].objects.filter(Q(**{poisontypedict['column'] + poisontypedict['qstr']: poisontypedict['searchterm']}))
-            for i in poisontype_list:
-                resultslist.append(i.Fungi_id)
+            for pt in poisontype_list:
+                resultslist.append(pt.Fungi_id)
 
         elif i == "CulinaryRating":
             culinaryratingdict = {}
@@ -752,8 +752,8 @@ def RunSearch(q_params):
             culinaryratingdict['qstr'] = '__icontains'
             culinaryratingdict['model'] = apps.get_model(app_label='fungi', model_name=culinaryratingdict['table'])
             culinaryrating_list = culinaryratingdict['model'].objects.filter(Q(**{culinaryratingdict['column'] + culinaryratingdict['qstr']: culinaryratingdict['searchterm']}))
-            for i in culinaryrating_list:
-                resultslist.append(i.Fungi_id)
+            for cr in culinaryrating_list:
+                resultslist.append(cr.Fungi_id)
 
         elif i == "Odour":
             odourdict = {}
@@ -763,8 +763,8 @@ def RunSearch(q_params):
             odourdict['qstr'] = '__icontains'
             odourdict['model'] = apps.get_model(app_label='fungi', model_name=odourdict['table'])
             odour_list = odourdict['model'].objects.filter(Q(**{odourdict['column'] + odourdict['qstr']: odourdict['searchterm']}))
-            for i in odour_list:
-                resultslist.append(i.Fungi_id)
+            for odl in odour_list:
+                resultslist.append(odl.Fungi_id)
 
         elif i == "Taste":
             tastedict = {}
@@ -774,8 +774,8 @@ def RunSearch(q_params):
             tastedict['qstr'] = '__icontains'
             tastedict['model'] = apps.get_model(app_label='fungi', model_name=tastedict['table'])
             taste_list = tastedict['model'].objects.filter(Q(**{tastedict['column'] + tastedict['qstr']: tastedict['searchterm']}))
-            for i in taste_list:
-                resultslist.append(i.Fungi_id)
+            for tl in taste_list:
+                resultslist.append(tl.Fungi_id)
 
         elif i == "StatusStatusData":
             statusdatadict = {}
@@ -785,8 +785,8 @@ def RunSearch(q_params):
             statusdatadict['qstr'] = '__icontains'
             statusdatadict['model'] = apps.get_model(app_label='fungi', model_name=statusdatadict['table'])
             statusdata_list = statusdatadict['model'].objects.filter(Q(**{statusdatadict['column'] + statusdatadict['qstr']: statusdatadict['searchterm']}))
-            for i in statusdata_list:
-                resultslist.append(i.Fungi_id)
+            for sdl in statusdata_list:
+                resultslist.append(sdl.Fungi_id)
 
         elif i == "StatusWhereFound":
             statuswherefounddict = {}
@@ -796,48 +796,35 @@ def RunSearch(q_params):
             statuswherefounddict['qstr'] = '__icontains'
             statuswherefounddict['model'] = apps.get_model(app_label='fungi', model_name=statuswherefounddict['table'])
             statuswherefound_list = statuswherefounddict['model'].objects.filter(Q(**{statuswherefounddict['column'] + statuswherefounddict['qstr']: statuswherefounddict['searchterm']}))
-            for i in statuswherefound_list:
-                resultslist.append(i.Fungi_id)
+            for swf in statuswherefound_list:
+                resultslist.append(swf.Fungi_id)
 
-        # print('resultslist', resultslist)
         # remove duplicate fungi from Results list
-        for i in resultslist:
-            if i not in resultslist2:
-                resultslist2.append(i)
+        for rs_item in resultslist:
+            if rs_item not in resultslist2:
+                resultslist2.append(rs_item)
 
-        # print('synonymlist4::::', synonymlist)
-        for i in synonymlist:
-            if i not in synonymlist2:
-                synonymlist2.append(i)
+        for sl_item in synonymlist:
+            if sl_item not in synonymlist2:
+                synonymlist2.append(sl_item)
 
-        for i in commonnameslist:
-            if i not in commonnameslist2:
-                commonnameslist2.append(i)
+        for cn_item in commonnameslist:
+            if cn_item not in commonnameslist2:
+                commonnameslist2.append(cn_item)
 
-        resultslist = []
+        # resultslist = []
         resultslist = resultslist2
         synonymlist = synonymlist2
         commonnameslist = commonnameslist2
 
-        # print('resultslist3:::', resultslist)
-        # print('synonymlist3::::', synonymlist)
+        fid = collections.Counter(resultslist)
+        print('FiD = ', fid)
 
-        FiD = collections.Counter(resultslist)
-        print('FiD = ', FiD)
+        for match, count in sorted(fid.items()):
+            if count == searchterms_count:
+                m = Fungi.objects.get(id=match)
+                matches.append(m)
 
-        for match, count in sorted(FiD.items()):
-            print('count =', str(count))
-            print('searchtermsCount =', str(searchtermsCount))
-            if count == searchtermsCount:
-                M = Fungi.objects.get(id=match)
-                Matches.append(M)
+        matches.sort(key=lambda c: c.LatinName, reverse=False)
 
-        Matches.sort(key=lambda c: c.LatinName, reverse=False)
-        # Matches.sort(key=lambda c: c.CommonName, reverse=False)
-        print('Matches::', Matches)
-        print('synonymlist::', synonymlist)
-        print('commonnameslist::', commonnameslist)
-        print('resultslist::', resultslist)
-
-    #return (Matches, synonymlist)
-    return Matches, synonymlist, commonnameslist
+    return matches, synonymlist, commonnameslist

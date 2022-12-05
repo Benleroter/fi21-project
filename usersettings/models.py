@@ -29,6 +29,7 @@ class Show(models.Model):
 	ShowSourcesList = models.BooleanField(default=True ,verbose_name=  ' _'+'Source lIST')
 	DetailSources = models.BooleanField(default=True ,verbose_name=  ' _'+'Detail Sources')
 	ShowFungiNotes = models.BooleanField(default=True ,verbose_name=  ' _'+'Fungi Notes')
+	#ShowFungiNotes2 = models.BooleanField(default=True, verbose_name=' _' + 'Fungi Notes2')
 
 	class Meta:
 		managed = True
@@ -37,7 +38,7 @@ class Show(models.Model):
 
 
 	def __str__(self):
-		return f'{self.user.username}'+' ID: ' +str(self.user.id)+', '+self.ShowPersonalNotes
+		return f'{self.user.username}'+' ID: ' +str(self.user.id)
 
 	def get_absolute_url(self):
 		#return  reverse('usersettings:edit-show-filter', kwargs={'slug': self.slug})

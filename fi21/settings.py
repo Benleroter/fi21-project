@@ -45,6 +45,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
+    'extra_views',
+    #request_middleware'
 ]
 
 MIDDLEWARE = [
@@ -55,6 +57,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'crum.CurrentRequestUserMiddleware',
 ]
 
 ROOT_URLCONF = 'fi21.urls'
@@ -83,11 +86,11 @@ WSGI_APPLICATION = 'fi21.wsgi.application'
 
 
 if 'RDS_HOSTNAME' in os.environ:
-    print('RDS_DB_NAME', os.environ.get('RDS_DB_NAME'))
-    print('RDS_USERNAME', os.environ.get('RDS_USERNAME'))
-    print('RDS_PASSWORD', os.environ.get('RDS_PASSWORD'))
-    print('RDS_HOSTNAME',os.environ.get('RDS_HOSTNAME'))
-    print('RDS_PORT',os.environ.get('RDS_PORT'))
+    # print('RDS_DB_NAME', os.environ.get('RDS_DB_NAME'))
+    # print('RDS_USERNAME', os.environ.get('RDS_USERNAME'))
+    # print('RDS_PASSWORD', os.environ.get('RDS_PASSWORD'))
+    # print('RDS_HOSTNAME',os.environ.get('RDS_HOSTNAME'))
+    # print('RDS_PORT',os.environ.get('RDS_PORT'))
  
     DATABASES = {
         'default': {
@@ -144,8 +147,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+#STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 LOGIN_REDIRECT_URL = 'AllFungi-HomePage'
 LOGIN_URL = 'login'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -159,3 +164,5 @@ EMAIL_HOST_USER =  os.environ.get('EMAIL_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_PASS')
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+#AUTH_USER_MODEL = 'users.CustomUser'
+

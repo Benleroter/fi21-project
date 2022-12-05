@@ -2,30 +2,30 @@ from django.shortcuts import render
 from usersettings.models import ShowSearchFields
 from fungi.views.FieldsToShow import fields_to_show
 from fungi.forms import UserSearchForm
-from fungi.views.getparamsfromform import GetParamsFromForm
+from fungi.views.getparamsfromform import get_params_from_form
 from fungi.views.editedQparams import clean_q_params
-from fungi.views.runsearch import RunSearch
+from fungi.views.runsearch import run_search
 import copy
 import re
 
 
 def search(request):
     user_search_fields = ShowSearchFields.objects.get(user_id=request.user)
-    print('user_id = ', request.user)
-    print('user_search_fields = ', user_search_fields)
+    #print('user_id = ', request.user)
+    #print('user_search_fields = ', user_search_fields)
     if request.method == 'POST':
         fields_to_display = fields_to_show(user_search_fields)
         print('fieldsToDisplay = ', fields_to_display)
         dynamic_search_form = type('DynamicSearchForm', (UserSearchForm,), fields_to_display)
         form = dynamic_search_form(request.POST)
         if form.is_valid():
-            q_params = GetParamsFromForm(form)
+            q_params = get_params_from_form(form)
             q_params = clean_q_params(q_params)
             for key, value in q_params.items():
                 print('key = ', key)
             print('q_params_A = ', q_params)
             #print('q_params_A = ', q_params['CommonName'])
-            fungi_found = RunSearch(q_params)
+            fungi_found = run_search(q_params)
             print('fungi_found = ', fungi_found)
             fungi_found_count = len(fungi_found[0])
             if fungi_found_count == 0:
@@ -47,7 +47,7 @@ def search(request):
             print('fungi_found[2] = ', fungi_found[2])
             print('fungi_found_count = ', str(fungi_found_count))
 
-            search_term =""
+            search_term = ""
 
             for key, value in q_params.items():
                 if key == 'LatinName':
@@ -61,7 +61,7 @@ def search(request):
                 'synonymlist': fungi_found[1],
                 'commonnameslist': fungi_found[2],
                 'resultscount': fungi_found_count,
-                'SearchTerms':  search_term
+                'SearchTerms': search_term
             }
 
             return render(request, 'search_results.html', context)

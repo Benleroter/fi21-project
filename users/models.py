@@ -12,7 +12,7 @@ class Profile(models.Model):
 		app_label  = "users"
 
 	def __str__(self):
-		return self.user.username
+		return self.user.username+', '+str(self.user.id)
 		#return f'{self.user.username} Profile', f'{self.user.id} id'
 		#return f'{self.user.username} Profile', f'{self.user.id} id'
 

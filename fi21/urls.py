@@ -56,7 +56,7 @@ urlpatterns = [
 
     path('fungi/<int:slug>/netlinks/', views.FungiLinksView.as_view(), name='fungi_netlinks'),
 
-    path('groups/', GroupToDisplay, name='fungi-groups'),
+    path('groups/', group_to_display, name='fungi-groups'),
 
     # GLOSSARY
     path('glossary/', show_glossary, name='glossary'),
@@ -85,7 +85,7 @@ urlpatterns = [
     path('fungi/<int:slug>/similar/', views.FungiSimilarView.as_view(), name='fungi_similar'),
     path('fungi/<int:slug>/latinsynonyms/', views.FungiLatinSynomymsView.as_view(), name='fungi_latinsynonyms'),
     path('fungi/<int:slug>/refs/', views.FungiRefsView.as_view(), name='fungi_refs'),
-    path('fungi/<int:pk>/personalnotes/', views.FungiPersonalNotesView.as_view(), name='personal_notes'),
+    #path('fungi/<int:pk>/personalnotes/', views.FungiPersonalNotesView.as_view(), name='personal_notes'),
 
     path('Sources/', show_sources_list, name='show_sources'),
 
@@ -101,8 +101,12 @@ urlpatterns = [
 
     #re_path('__debug__/', include(debug_toolbar.urls)),
 
-    path('Fungis/<int:pk>/notes/edit/', views.FunginotesEditView2.as_view(), name='Fungi_note_edit')
-    
+    #path('Fungis/<int:pk>/notes/edit/', views.FunginotesEditView.as_view(), name='Fungi_note_edit'),
+    #path('Fungis/<int:pk>/notes2/edit/', views.FunginotesEditView2.as_view(), name='Fungi_note_edit2'),
+    path('Fungis/<int:pk>/notes/edit/', views.FunginoteEdit.as_view(), name="Fungi_note_edit"),
+    path('Fungis/<int:pk>/notes/create/', views.FunginoteCreate.as_view(), name="Fungi_note_create"),
+    path('Fungis/<int:pk>/notes/delete/', views.FunginoteDelete.as_view(), name="Fungi_note_delete"),
+
  ]
 
 

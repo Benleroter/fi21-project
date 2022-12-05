@@ -1,18 +1,19 @@
-from django.db import models
 from django.contrib.auth.models import User
 import PIL.Image
 from django.urls import reverse
 from django.utils.text import slugify
 from fungi.choices import *
-from django.contrib.gis.geos import Point
 from django.contrib.gis.db import models
+from django.utils import timezone
+from crum import get_current_user  # pip3 install django-crum
+
 
 class Fungi(models.Model):
     CommonName = models.CharField(max_length=255, blank=False, null=False, default='Common Name')
     LatinName = models.CharField(max_length=255, blank=False, null=False, default='Latin Name')
-    #UKSpecies = models.CharField(max_length=20, choices=UKSpeciesChoices, blank=True, null=True, default='Yes', verbose_name='Recorded in UK')
+    # UKSpecies = models.CharField(max_length=20, choices=UKSpeciesChoices, blank=True, null=True, default='Yes', verbose_name='Recorded in UK')
     UKSpecies = models.CharField(max_length=20, blank=True, null=True, default='Yes', verbose_name='Recorded in UK')
-    #Macromycetes = models.CharField(max_length=8, choices=MacromycetesChoices, blank=True, null=True, default='Yes')
+    # Macromycetes = models.CharField(max_length=8, choices=MacromycetesChoices, blank=True, null=True, default='Yes')
     Macromycetes = models.CharField(max_length=8, blank=True, null=True, default='Yes')
     Group = models.CharField(max_length=255, blank=True, null=True, default='not assigned')
     Comments = models.CharField(max_length=1024, blank=True, null=True, default='NoData')
@@ -32,7 +33,7 @@ class Fungi(models.Model):
     def get_absolute_url(self):
         return reverse('FungiDetail-Page', kwargs={'slug': self.slug})
 
-    # Following function creates all child records with default data
+    # Following  overides save() to create all child records with default data
     def save(self, *args, **kwargs):
         is_new = not self.pk
         super().save(*args, **kwargs)
@@ -56,21 +57,26 @@ class Fungi(models.Model):
             Status.objects.create(Fungi=self)
             FungiComments.objects.create(Fungi=self)
             DetailSources.objects.create(Fungi=self)
-            PersonalNotes.objects.create(Fungi=self)
-
 
             if not self.slug:
                 self.slug = slugify(self.id)
 
             return super().save(*args, **kwargs)
 
+
 class FungiNotes(models.Model):
     Fungi = models.ForeignKey(Fungi, max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='fungi_notes')
-    Note =  models.CharField(max_length=255, blank=True, null=True, default='NoData')
-    MonthFoundNotes = models.CharField(max_length=255, choices=MonthFoundChoices, blank=True, verbose_name='Month Found', null=True, default='NoData')
-    WhereFoundNotes = models.CharField(max_length=2048, blank=True, verbose_name='Where Found', null=True, default='NoData')
-    EnvironmentNotes = models.CharField(max_length=2048, blank=True, verbose_name='Environment Notes', null=True, default='NoData')
+    User = models.ForeignKey(User, max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='FungiNotes_User')
+    Note = models.CharField(max_length=255, blank=True, null=True, default='NoData')
+    NoteUser = models.IntegerField(default=1, blank=True, null=True)
+    NoteDate = models.DateField(default=timezone.now, blank=True, null=True, verbose_name='Note Date')
+    MonthFound = models.CharField(max_length=255, choices=MonthFoundChoices, blank=True, verbose_name='Month Found', null=True, default='NoData')
+    WhereFound = models.CharField(max_length=2048, blank=True, verbose_name='Where Found', null=True, default='NoData')
+    Environment = models.CharField(max_length=2048, blank=True, verbose_name='Environment Notes', null=True, default='NoData')
     NoteCount = models.IntegerField(default=1)
+    created_by = models.CharField(max_length=255, blank=True, null=True, default='NoData')
+    modified = models.DateField(auto_now=True)
+    modified_by = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     slug = models.SlugField(null=True)
 
     class Meta:
@@ -78,26 +84,86 @@ class FungiNotes(models.Model):
         db_table = 'FungiNotes'
         verbose_name = "Fungi Note"
         verbose_name_plural = "Fungi Notes"
-        ordering = ['Fungi']
+        ordering = ['NoteUser']
         app_label = "fungi"
 
     def __str__(self):
-        return self.Fungi.CommonName+', '+str(self.NoteCount)
+        return str(self.id) + ', ' + str(self.User) + ', ' + self.Fungi.CommonName + ', ' + str(self.Fungi.id) + ', ' + self.MonthFound + ', ' + str(self.NoteUser)
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.Fungi_id)
+            # print('TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT')
+        # print('RRRRRRRRRRRRRRRRRRRRRRRRRRR')
+        user = get_current_user()  # https://django-crum.readthedocs.io/en/latest/  -  method to get current user details in models with request.  Use "get_current user" - see  MIDDLEWARE in settings
+        # self.Fungi = 1
+        if user and not user.pk:
+            user = None
+            # print('QQQQQQQQQQQQQQQQQ')
+        if not self.pk:
+            # print('YYYYYYYYYYYYYYYYYYY')
+            self.created_by = user.username
+            self.NoteUser = user.id
+            self.User = user
+
+        self.modified_by = user.username
+        # print('JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ')
         return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         return reverse('FungiDetail-Page', kwargs={'slug': self.slug})
 
 
+# class FungiNotes2(models.Model):
+#     User = models.ForeignKey(User, max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='FungiNotes2_User')
+#     FungiNoteName = models.ForeignKey(Fungi, default='1', max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='FungiNotes2_fungi_note')
+#     FungNoteiId = models.IntegerField(default=1, blank=True, null=True)
+#     NoteUser = models.IntegerField(default=1, blank=True, null=True)
+#     NoteDate = models.DateField(default=timezone.now, blank=True, null=True,  verbose_name='Note Date')
+#     Note =  models.CharField(max_length=255, blank=True, null=True, default='NoData')
+#     MonthFound = models.CharField(max_length=255, choices=MonthFoundChoices, blank=True, verbose_name='Month Found', null=True, default='NoData')
+#     WhereFound = models.CharField(max_length=2048, blank=True, verbose_name='Where Found', null=True, default='NoData')
+#     Environment = models.CharField(max_length=2048, blank=True, verbose_name='Environment Notes', null=True, default='NoData')
+#     NoteCount = models.IntegerField(default=1)
+#     created_by = models.CharField(max_length=255, blank=True, null=True, default='NoData')
+#     modified = models.DateField(auto_now=True)
+#     modified_by = models.CharField(max_length=255, blank=True, null=True, default='NoData')
+#     slug = models.SlugField(null=True)
+#
+#     class Meta:
+#         managed = True
+#         db_table = 'FungiNotes2'
+#         verbose_name = "Fungi Note 2"
+#         verbose_name_plural = "Fungi Notes 2"
+#         ordering = ['NoteUser']
+#         app_label = "fungi"
+#
+#     def __str__(self):
+#         return self.User.username+', '+str(self.NoteCount)+', '+self.MonthFound+', '+str(self.NoteUser)+', '+str(self.User.id)
+#
+#     def save(self, *args, **kwargs):
+#         if not self.slug:
+#             self.slug = slugify(self.Fungi_id)
+#         user = get_current_user() #https://django-crum.readthedocs.io/en/latest/  -  method to get current user details in models with request.  Use "get_current user" - see  MIDDLEWARE in settings
+#
+#         if user and not user.pk:
+#             user = None
+#         if not self.pk:
+#             self.created_by = user.username
+#             self.NoteUser = user.id
+#         self.modified_by = user.username
+#
+#         return super().save(*args, **kwargs)
+#
+#     def get_absolute_url(self):
+#         return reverse('FungiDetail-Page', kwargs={'slug': self.slug})
+
+
 class DetailSources(models.Model):
     Fungi = models.ForeignKey(Fungi, max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='fungi_detail_sources')
     Source = models.CharField(max_length=255, blank=True, null=True, default='NoData')
-    #Detail = models.CharField(max_length=255, choices=ReferenceSourceDetailChoices, blank=True, null=True, default='NoData')
-    Detail = models.CharField(max_length=255,  blank=True, null=True, default='NoData')
+    # Detail = models.CharField(max_length=255, choices=ReferenceSourceDetailChoices, blank=True, null=True, default='NoData')
+    Detail = models.CharField(max_length=255, blank=True, null=True, default='NoData')
 
     class Meta:
         managed = True
@@ -131,8 +197,8 @@ def fungi_choices():
 class SimilarFungi(models.Model):
     Fungi = models.ForeignKey(Fungi, max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='fungi_similar')
     slug = models.SlugField(null=True)
-    SFid = models.IntegerField( choices=fungi_choices(), blank=True, null=True, verbose_name='Choose similar fungi from drop down list' , default=0)
-    SimilarFungiName = models.CharField(max_length=255,  blank=True, null=True, verbose_name='Similar Fungi Name', default='NoData')
+    SFid = models.IntegerField(choices=fungi_choices(), blank=True, null=True, verbose_name='Choose similar fungi from drop down list', default=0)
+    SimilarFungiName = models.CharField(max_length=255, blank=True, null=True, verbose_name='Similar Fungi Name', default='NoData')
 
     class Meta:
         managed = True
@@ -143,17 +209,16 @@ class SimilarFungi(models.Model):
         app_label = "fungi"
 
     def __str__(self):
-        return str('A:'+str(self.Fungi.id )+
-                         ', B:'+self.Fungi.CommonName+
-                         ', C:'+str(self.slug)+
-                         ', D:'+str(self.SFid)+
-                         ', E:'+self.SimilarFungiName)
-
+        return str('A:' + str(self.Fungi.id) +
+                   ', B:' + self.Fungi.CommonName +
+                   ', C:' + str(self.slug) +
+                   ', D:' + str(self.SFid) +
+                   ', E:' + self.SimilarFungiName)
 
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.Fungi_id)
-        if  self.SFid !=0:
+        if self.SFid != 0:
             f = Fungi.objects.get(id=self.SFid)
             if f.CommonName != "Common Name":
                 self.SimilarFungiName = f.CommonName
@@ -245,8 +310,8 @@ class Seasons(models.Model):
 class Habitat(models.Model):
     Fungi = models.ForeignKey(Fungi, max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='fungi_habitat')
     Associations = models.CharField(max_length=255, blank=True, null=True, default='NoData')
-    #Ph = models.CharField(max_length=255, choices=choices2.PhTypeChoices, blank=True, null=True, default='NoData')
-    Ph = models.CharField(max_length=255,  blank=True, null=True, default='NoData')
+    # Ph = models.CharField(max_length=255, choices=choices2.PhTypeChoices, blank=True, null=True, default='NoData')
+    Ph = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     Soil = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     Substrate = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     Environment = models.CharField(max_length=255, blank=True, null=True, default='NoData')
@@ -262,17 +327,16 @@ class Habitat(models.Model):
         app_label = "fungi"
 
     def __str__(self):
-       # return self.Fungi.CommonName + ", " + self.Associations + ', ' + "Fungi_ID:" + str(self.Fungi.id)
+        # return self.Fungi.CommonName + ", " + self.Associations + ', ' + "Fungi_ID:" + str(self.Fungi.id)
         return str('A:' + str(self.Fungi.id) +
                    ', B:' + self.Fungi.CommonName +
-                   ', C:' + self.Associations+
+                   ', C:' + self.Associations +
                    ', D:' + self.Ph +
                    ', E:' + self.Soil +
                    ', F:' + self.Substrate +
                    ', G:' + self.Environment +
                    ', H:' + self.Comments +
                    ', I:' + self.slug)
-
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -331,10 +395,10 @@ class Stipe(models.Model):
     Base = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     Texture = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     Ring = models.CharField(max_length=20, blank=True, null=True, default='NoData')
-    #Ring = models.CharField(max_length=20, choices=RingPresentChoices, blank=True, null=True, default='NoData')
+    # Ring = models.CharField(max_length=20, choices=RingPresentChoices, blank=True, null=True, default='NoData')
     RingDescription = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     slug = models.SlugField(null=True)
-    #Volva = models.CharField(max_length=20, choices=VolvaChoices, blank=True, null=True, default='NoData')
+    # Volva = models.CharField(max_length=20, choices=VolvaChoices, blank=True, null=True, default='NoData')
     Volva = models.CharField(max_length=20, blank=True, null=True, default='NoData')
 
     Comments = models.CharField(max_length=2048, blank=True, null=True, default='no comments')
@@ -361,16 +425,16 @@ class Stipe(models.Model):
 
 class PoresAndTubes(models.Model):
     Fungi = models.ForeignKey(Fungi, max_length=255, blank=False, null=False, on_delete=models.CASCADE, related_name='fungi_pores')
-    PoresPresent = models.CharField(max_length=255,blank=True,null=True, default='NoData')
-    #PoresPresent = models.CharField(max_length=20, choices=PoresPresentChoices, blank=True, null=True, default='No')
+    PoresPresent = models.CharField(max_length=255, blank=True, null=True, default='NoData')
+    # PoresPresent = models.CharField(max_length=20, choices=PoresPresentChoices, blank=True, null=True, default='No')
     PoreColour = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     PoreShape = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     PoreBruiseColour = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     TubeColour = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     TubeShape = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     TubeBruiseColour = models.CharField(max_length=255, blank=True, null=True, default='NoData')
-    #Milk = models.CharField(max_length=20, choices=MilkPresentChoices, blank=True, null=True, default='NoData')
-    Milk = models.CharField(max_length=20,  blank=True, null=True, default='NoData')
+    # Milk = models.CharField(max_length=20, choices=MilkPresentChoices, blank=True, null=True, default='NoData')
+    Milk = models.CharField(max_length=20, blank=True, null=True, default='NoData')
     Comments = models.CharField(max_length=2048, blank=True, null=True, default='no comments')
     slug = models.SlugField(null=True)
 
@@ -402,8 +466,8 @@ class Gills(models.Model):
     CutColour = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     Attachment = models.CharField(max_length=255, blank=True, null=True, default='NoData')
     Arrangement = models.CharField(max_length=255, blank=True, null=True, default='NoData')
-    #Milk = models.CharField(max_length=20, choices=MilkPresentChoices, blank=True, null=True, default='NoData')
-    Milk = models.CharField(max_length=20,  blank=True, null=True, default='NoData')
+    # Milk = models.CharField(max_length=20, choices=MilkPresentChoices, blank=True, null=True, default='NoData')
+    Milk = models.CharField(max_length=20, blank=True, null=True, default='NoData')
     Comments = models.CharField(max_length=2048, blank=True, null=True, default='no comments')
     slug = models.SlugField(null=True)
 
@@ -670,7 +734,6 @@ class Glossary(models.Model):
         if not self.slug:
             self.slug = slugify(self.Term)
         return super().save(*args, **kwargs)
-
 
     def get_absolute_url(self):
         return reverse('glossary_entry', kwargs={'slug': self.slug})  # new

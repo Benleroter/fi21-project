@@ -22,8 +22,13 @@ from fungi.models import (
     DetailSources,
     Glossary,
     FungiNotes,
+    #FungiNotes2,
 )
 
+
+# @admin.register(FungiNotes2)
+# class FungiNotes2Admin(admin.ModelAdmin):
+#     list_display = ("FungNoteiId", "User","Note")
 
 @admin.register(FungiNotes)
 class FungiNotesAdmin(admin.ModelAdmin):

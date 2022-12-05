@@ -1,14 +1,42 @@
-from typing import Type
-
 from django import forms
-from django.forms import inlineformset_factory, modelformset_factory, BaseModelFormSet, BaseModelForm
+from django.forms import inlineformset_factory, modelformset_factory
 from .models import *
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 
 
+class FungiForm(forms.ModelForm):
+    class Meta:
+        model = Fungi
+        fields = '__all__'
 
 
+class NotesCreateForm(forms.ModelForm):
+    class Meta:
+        model = FungiNotes
+        # fields = ('User','Fungi','Note', 'MonthFound', 'WhereFound', 'Environment')
+        fields = ('Note', 'MonthFound', 'WhereFound', 'Environment')
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('User')
+        self.fungi = Fungi.CommonName
+        super(NotesCreateForm, self).__init__(*args, **kwargs)
+
+    def clean_title(self):
+        title = self.cleaned_data['title']
+        if FungiNotes.objects.filter(user=self.user, title=title).exists():
+            raise forms.ValidationError("You have already written a book with same title.")
+        return title
+
+FungiNotesFormset3 = inlineformset_factory(
+    Fungi,
+    FungiNotes,
+    extra=1,
+    labels='',
+    can_delete=True,
+    exclude=('Fungi', 'slug', 'NoteCount', 'NoteUser'),
+    # formset = NotesForm3
+)
 
 FungiNotesFormset = inlineformset_factory(
     Fungi,
@@ -16,7 +44,8 @@ FungiNotesFormset = inlineformset_factory(
     extra=1,
     labels='',
     can_delete=True,
-    exclude=('slug','NoteCount')
+    exclude=('slug', 'NoteCount'),
+    # formset = NotesForm
 )
 
 FungiNetLinksFormset = inlineformset_factory(
@@ -27,7 +56,6 @@ FungiNetLinksFormset = inlineformset_factory(
     can_delete=True,
     fields=('Website', 'Websiteurl')
 )
-
 
 class UserRegisterForm(UserCreationForm):
     email = forms.EmailField()
@@ -43,12 +71,6 @@ class UserSearchForm(forms.Form):
 class GroupForm(forms.Form):
     pass
 
-# class FruitingBodyEditForm(forms.ModelForm):
-#     class Meta:
-#         model = FruitingBody
-#         fields = "__all__"
-
-
 FungiFormset = modelformset_factory(
     Fungi,
     extra=1,
@@ -63,7 +85,7 @@ FungiHabitatFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -73,7 +95,7 @@ FungiCapFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -83,7 +105,7 @@ FungiStipeFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -93,7 +115,7 @@ FungiCuisineFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -103,7 +125,7 @@ FungiFleshFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -113,7 +135,7 @@ FungiSeasonsFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -123,7 +145,7 @@ FungiSporesFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields=('Colour','Comments')
+    # fields=('Colour','Comments')
     exclude=('slug',)
 )
 
@@ -133,7 +155,7 @@ FungiStatusFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -143,7 +165,7 @@ FungiPoresFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -153,7 +175,7 @@ FungiGillsFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -163,7 +185,7 @@ FungiCommentsFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
 
@@ -173,10 +195,9 @@ FungiTaxonomyFormset = inlineformset_factory(
     extra=0,
     labels='',
     can_delete=False,
-    #fields='__all__'
+    # fields='__all__'
     exclude=('slug',)
 )
-
 
 FungiRefsFormset = inlineformset_factory(
     Fungi,
@@ -220,7 +241,7 @@ FungiSimilarFormset = inlineformset_factory(
     extra=1,
     labels='',
     can_delete=True,
-    #fields=('SimilarFungiName2',)
+    # fields=('SimilarFungiName2',)
     fields=('SFid',)
 )
 
@@ -261,6 +282,5 @@ GlossaryFormset = modelformset_factory(
     labels='',
     can_delete=True,
     exclude=('slug',)
-    #fields='__all__'
+    # fields='__all__'
 )
-

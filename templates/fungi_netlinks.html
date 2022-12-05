@@ -1,21 +1,6 @@
 {% extends 'base.html' %}
 {% load crispy_forms_filters %}
-{% block header %}
-    <h1 style="color:white;">
-        {% if CulinaryRating == "Deadly" or  CulinaryRating == "dangerous" %}
-            <img src="/media/images/icons8-skull-and-crossbones-48.png" alt="Skull and Cross Bones Image">
-        {% endif %}
-        {% if user.show.ShowLatinNames %}
-            {{ fungi.CommonName }}, <em>{{ fungi.LatinName }}</em>, id: {{ fungi.id }}
-        {% else %}
-            {{ fungi.CommonName }}
-        {% endif %}
-        {% if fungi.UKSpecies == "Yes" %}
-            <img src="/media/images/pngfind.com-english-flag-png-6458760.png" alt="Flag Image">
-        {% endif %}
 
-    </h1>
-{% endblock header %}
 <!--https://www.youtube.com/watch?v=OduVfuv44K8-->
 <!-- https://github.com/veryacademy/YT_Inline_Formset_CBV_Ex1/blob/main/books/templates/author_books_edit.html-->
 

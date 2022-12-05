@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load crispy_forms_filters %}
 
-{% block title %}New Fungimmmm{% endblock %}
+{% block title %}{% endblock title %}
 
 {% block content %}
     <div class='detail'>
@@ -15,12 +15,9 @@
                 {% csrf_token %}
                 {{ form|crispy }}
             </div>
-
-
             <p class="pt-2">
                 <button type="submit" class="btn btn-success">Add Fungi</button>
-                <a href="{% url 'AllFungi-HomePage' %}" role="button" class="btn btn-outline-info">Cancel</a>
-
+                <a href="{% url 'AllFungi-HomePage' %}" role="button" class="btn btn-secondary">Cancel</a>
             </p>
         </form>
     </div>

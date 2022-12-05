@@ -1,18 +1,10 @@
 from django.views.generic import DetailView
 from usersettings.models import Show
-# from fungi.models import Fungi
 from fungi.models import *
-# from django.db.models import Q
 from django.contrib.auth.models import User  # AnonymousUser
-# from bs4 import BeautifulSoup
-# from bs4.element import NavigableString
-# import re
-# from django.utils.safestring import mark_safe
-# from django.template import Context, Template
-# import collections
-# from fungi.views.insertlinks import insertglossarylinks
 from fungi.views.insertglossarylinks import insertglossarylinks
 from fungi.views.insertfunginamelinks import insertfunginamelinks
+from django.db.models import Q
 
 
 class FungiDetail(DetailView):
@@ -25,11 +17,9 @@ class FungiDetail(DetailView):
         currentfungi = context['fungi']
 
         def data_present(fungi_attribute):
-            count2 = 0
             dp = 'True'
             context_var = [f for f in fungi_attribute._meta.get_fields() if f.name not in ['id', 'DataPresent', 'Fungi', 'slug']]
             for c in context_var:
-                count2 += count2
                 field_value = getattr(fungi_attribute, c.name, None)
                 if field_value is None:
                     field_value = 'NoData'
@@ -41,7 +31,6 @@ class FungiDetail(DetailView):
             return dp
 
         # retrieving user id's to get filter preferences
-
         if self.request.user.is_authenticated:
             currentuser = self.request.user
             # uid = request.user
@@ -57,15 +46,62 @@ class FungiDetail(DetailView):
         if retrievedobjects:
             context['NetLinks'] = retrievedobjects
 
+        # # PERSONAL NOTES2
+        # pid = FungiNotes2.objects.filter(FungiNoteName=self.object).first()
+        # currentuser = self.request.user
+        # print('currentuser = ', currentuser.username)
+        # print('currentuser = ', currentuser.id)
+        #
+        # if pid is not None and usershowsettings.ShowFungiNotes2:
+        #     if self.request.user.is_superuser:
+        #         print('User += ', self.request.user)
+        #         print('User += ', self.object)
+        #         retrievedobjects = FungiNotes2.objects.filter(User=currentuser)
+        #         print('retrievedobjects-A11 = ', retrievedobjects)
+        #         countera = 1
+        #         for count in retrievedobjects:
+        #             count.NoteCount = countera
+        #             countera += 1
+        #         print('retrievedobjects-A22= ', retrievedobjects)
+        #     else:
+        #         retrievedobjects = FungiNotes2.objects.filter(User=currentuser.id)
+        #         print('retrievedobjects-B11 = ', retrievedobjects)
+        #         counterb = 1
+        #         for count in retrievedobjects:
+        #             count.NoteCount = counterb
+        #             counterb += 1
+        #         print('retrievedobjects-B22 = ', retrievedobjects)
+        #
+        #     if retrievedobjects:
+        #         context['FungiNotesFlag2'] = 'Yes'
+        #         context['data_to_display'] = True
+        #         context['Notes'] = retrievedobjects
+
         # PERSONAL NOTES
         pid = FungiNotes.objects.filter(Fungi_id=self.object).first()
-        # If Common Names have all been deleted need default 'NoData' record in DB
+        currentuser = self.request.user
+        print('currentuser = ', currentuser.username)
+        print('currentuser = ', currentuser.id)
+
         if pid is not None and usershowsettings.ShowFungiNotes:
-            retrievedobjects = FungiNotes.objects.filter(Fungi_id=self.object)
-            counter = 1
-            for count in retrievedobjects:
-                count.NoteCount = counter
-                counter += 1
+            if self.request.user.is_superuser:
+                retrievedobjects = FungiNotes.objects.filter(Fungi_id=self.object, )
+                print('retrievedobjects-A1 = ', retrievedobjects)
+                countera = 1
+                for count in retrievedobjects:
+                    count.NoteCount = countera
+                    countera += 1
+                print('retrievedobjects-A2= ', retrievedobjects)
+            else:
+                retrievedobjects = FungiNotes.objects.filter(Q(NoteUser=currentuser.id) & Q(Fungi_id=self.object.id))
+                print('retrievedobjects-B1a = ', retrievedobjects)
+                # retrievedobjects = FungiNotes.objects.filter(NoteUser=currentuser.id)
+                # print('retrievedobjects-B1b = ', retrievedobjects)
+                counterb = 1
+                for count in retrievedobjects:
+                    count.NoteCount = counterb
+                    counterb += 1
+                print('retrievedobjects-B2 = ', retrievedobjects)
 
             if retrievedobjects:
                 context['FungiNotesFlag'] = 'Yes'

@@ -1,42 +1,9 @@
 {% extends "base.html" %}
 
-{% block header %}
-    <h1 style="color:white;">
-        {% if "Deadly" in CulinaryRating or "deadly" in CulinaryRating %}
-            <img src="/media/images/icons8-skull-and-crossbones-48-red.png" alt="/default.jpg"/>
-        {% elif  "Poisonous" in CulinaryRating or  "poisonous" in CulinaryRating %}
-            <img src="/media/images/icons8-skull-and-crossbones-48.png" alt="/default.jpg"/>
-        {% endif %}
-        {% if "Edible" in CulinaryRating %}
-            <img src="/media/images/icons8-dining-room-64-white-2.png" alt="/default.jpg"/>
-        {% endif %}
-        {% if "Inedible" in CulinaryRating %}
-            <img src="/media/images/icons8-dining-room-64-white-5.png" alt="/default.jpg"/>
-        {% endif %}
-        {% if "medicinal" in CulinaryRating %}
-            <img src="/media/images/icons8-medicine-64.png" alt="Hippocrates">
-        {% endif %}
-        {% if object.CommonName == "Common Name" %}
-            <em>{{ object.LatinName }}</em>, id: {{ object.id }}
-        {% endif %}
-        {% if object.CommonName != "Common Name" %}
-            {% if user.show.ShowLatinNames %}
-                {{ object.CommonName }}, <em>{{ object.LatinName }}</em>, id {{ object.id }}
-            {% else %}
-                {{ object.CommonName }}
-            {% endif %}
-        {% endif %}
-        {% if object.UKSpecies == "Yes" %}
-            <img src="/media/images/pngfind.com-english-flag-png-6458760.png" alt="/default.jpg"/>
-        {% endif %}
-
-
-    </h1>
-{% endblock header %}
-
 {% block Netlinks %}
     <h5>
         <div class="detail2">Further reading & Links:</div>
+        {% block title %}{% endblock title %}
         {% for i in NetLinks %}
             {% if i.Website != 'NoData' %}
                 <!--<div class="sub-content" >-->
@@ -116,6 +83,86 @@
             {% endif %}
         {% endif %}
 
+
+        <!-- Personal Notes -->
+        {% if FungiNotesFlag == 'Yes' %}
+            <div class="detail">
+                {% if Notes %}
+                    <h3>
+
+                        {% if request.user.is_superuser %}
+                            All Notes: user:{{ user.username }}
+                            <a href="{% url 'fungi_refs' object.id %}" class="btn btn-warning" style="float:right;">References</a>
+                            <a href="{% url 'Fungi_note_create' fungi.id %}" class="btn btn-success" style="float:right;">Add new note</a>
+                        {% elif  request.user.is_authenticated %}
+                            {{ user.username }}'s Personal Notes:
+                            <a href="{% url 'Fungi_note_create' fungi.id %}" class="btn btn-success" style="float:right;">Add new note</a>
+                        {% endif %}
+
+                    </h3>
+                    {% for i in Notes %}
+                        {% if  request.user.is_superuser %}
+                            NOTE: {{ i.NoteCount }}, author: {{ i.created_by }}, created: {{ i.NoteDate }}
+                        {% else %}
+                            NOTE: {{ i.NoteCount }}, {{ fungi.CommonName }}, author: {{ i.created_by }}, created: {{ i.NoteDate }}
+                        {% endif %}
+                        <div class="sub-content">
+                            <h5>
+                                {% if i.Note  != "NoData" %}
+                                    <div class="sub-content">
+                                        <strong>Comments: </strong><a>{{ i.Note }}</a>
+                                    </div>
+                                {% endif %}
+                                {% if i.MonthFound  != "NoData" %}
+                                    <div class="sub-content">
+                                        <strong>Month found: </strong><a>{{ i.MonthFound }}</a>
+                                    </div>
+                                {% endif %}
+                                {% if i.WhereFound  != "NoData" %}
+                                    <div class="sub-content">
+                                        <strong>Where found: </strong><a>{{ i.WhereFound }}</a>
+                                    </div>
+                                {% endif %}
+                                {% if i.Environment  != "NoData" %}
+                                    <div class="sub-content">
+                                        <strong>Environmental Notes: </strong><a>{{ i.Environment }}</a>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <div class="sub-content">
+
+                                        <a href="{% url 'Fungi_note_edit' i.id %}" class="btn btn-success">Edit Note</a>
+                                        <a href="{% url 'Fungi_note_delete' i.id %}" class="btn btn-danger">Delete Note</a>
+                                    </div>
+                                </div>
+
+                            </h5>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <h3>
+                        no Personal Notes entered:
+                        {% if request.user.is_superuser %}
+                            <a href="{% url 'fungi_refs' object.id %}" class="btn btn-warning"
+                               style="float:right;">
+                                References</a>
+                            <a href="{% url 'Fungi_note_edit' fungi.id %}" class="btn btn-success" style="float:right;">
+                                edit notes</a>
+                        {% endif %}
+                    </h3>
+                {% endif %}
+
+            </div>
+        {% else %}
+            {% if request.user.is_authenticated and  user.username != 'GuestUser' %}
+                <div class="detail">
+                    <div class="sub-content">
+                        <a href="{% url 'Fungi_note_create' object.id %}" class="btn btn-success">Add Notes</a>
+
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
 
 
         <!-- Habitat -->
@@ -913,80 +960,7 @@
             {% endif %}
         {% endif %}
 
-        <!-- Personal Notes -->
-        {% if FungiNotesFlag == 'Yes' %}
-            <div class="detail">
-                {% if Notes %}
-                    <h3>
-                        Personal Notes:
-                        {% if request.user.is_superuser %}
-                            <a href="{% url 'fungi_refs' object.id %}" class="btn btn-warning"
-                               style="float:right;">
-                                References</a>
-                            <a href="{% url 'Fungi_note_edit' fungi.id %}" class="btn btn-success" style="float:right;">
-                                edit notes</a>
-                        {% endif %}
 
-                    </h3>
-
-                    {% for i in Notes %}
-                        NOTE: {{ i.NoteCount }}
-                        <div class="sub-content">
-                            <h5>
-                                {% if i.Note  != "no comments" %}
-                                    <div class="sub-content">
-                                        <strong>Comments: </strong><a>{{ i.Note }}</a>
-                                    </div>
-
-
-                                    {% if i.MonthFoundNotes  != "NoData" %}
-                                        <div class="sub-content">
-                                            <strong>Month found: </strong><a>{{ i.MonthFoundNotes }}</a>
-                                        </div>
-                                    {% endif %}
-
-                                    {% if i.WhereFoundNotes  != "NoData" %}
-                                        <div class="sub-content">
-                                            <strong>Where found: </strong><a>{{ i.WhereFoundNotes }}</a>
-                                        </div>
-                                    {% endif %}
-
-
-                                    {% if i.EnvironmentNotes  != "NoData" %}
-                                        <div class="sub-content">
-                                            <strong>Environmental Notes: </strong><a>{{ i.EnvironmentNotes }}</a>
-                                        </div>
-                                    {% endif %}
-
-
-                                {% endif %}
-                            </h5>
-                        </div>
-                    {% endfor %}
-                {% else %}
-                    <h3>
-                        no Personal Notes entered:
-                        {% if request.user.is_superuser %}
-                            <a href="{% url 'fungi_refs' object.id %}" class="btn btn-warning"
-                               style="float:right;">
-                                References</a>
-                            <a href="{% url 'Fungi_note_edit' fungi.id %}" class="btn btn-success" style="float:right;">
-                                edit notes</a>
-                        {% endif %}
-
-                    </h3>
-                {% endif %}
-
-            </div>
-        {% else %}
-            {% if request.user.is_superuser %}
-                <div class="detail">
-                    <div class="sub-content">
-                        <a href="{% url 'Fungi_note_edit' object.id %}">Add Notes</a>
-                    </div>
-                </div>
-            {% endif %}
-        {% endif %}
 
 
 

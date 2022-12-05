@@ -1,54 +1,92 @@
 from django.shortcuts import render
 from fungi.views.filteredfungi import fungi_to_search
 from usersettings.models import Show
-from django.views.generic import ListView, CreateView, DetailView, FormView
+from django.views.generic import ListView, CreateView, DetailView, FormView, DeleteView
 from django.views.generic.detail import SingleObjectMixin
 from django.views.generic import UpdateView
 from fungi.forms import *
 from django.urls import reverse
 from django.contrib import messages
 from django.http import HttpResponseRedirect
-from django.forms import modelformset_factory, inlineformset_factory
+from django.forms import inlineformset_factory
+from fungi.models import FungiNotes
+from django.contrib.auth.models import User
 
-class FunginotesEditView2(SingleObjectMixin, FormView):
 
-    model = Fungi
-    template_name = 'fungi_notes.html'
-
-    def get(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Fungi.objects.all())
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        self.object = self.get_object(queryset=Fungi.objects.all())
-        return super().post(request, *args, **kwargs)
-
-    def get_form(self, form_class=None):
-        return FungiNotesFormset(**self.get_form_kwargs(), instance=self.object)
+class FunginoteCreate(CreateView):
+    model = FungiNotes
+    template_name = 'fungi_note_create.html'
+    form_class = NotesCreateForm
 
     def form_valid(self, form):
-        form.save()
-
-        messages.add_message(
-            self.request,
-            messages.SUCCESS,
-            'Changes were saved.'
-        )
-
+        self.object = form.save(commit=False)
+        self.object.user = self.request.user
+        f = self.get_object(queryset=Fungi.objects.all())
+        self.object.Fungi_id = f.id
+        self.object.save()
         return HttpResponseRedirect(self.get_success_url())
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # user = self.request.user
+        f = self.get_object(queryset=Fungi.objects.all())
+        context["Fungi_Id"] = f.id
+        context["Fungi_CommonName"] = f.CommonName
+        context["Fungi_LatinName"] = f.LatinName
+        context["Fungi_note"] = True
+        return context
+
+    def get_initial(self, *args, **kwargs):
+        initial = super(FunginoteCreate, self).get_initial(**kwargs)
+        initial['Fungi'] = self.get_object(queryset=Fungi.objects.all())
+        initial['User'] = self.request.user
+        return initial
+
+    def get_form_kwargs(self, *args, **kwargs):
+        kwargs = super(FunginoteCreate, self).get_form_kwargs(*args)#**kwargs)
+        kwargs['User'] = self.request.user
+        return kwargs
+
+
+class FunginoteDelete(DeleteView):
+    model = FungiNotes
+    template_name = 'fungi_note_delete.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # user = self.request.user
+        f = self.get_object(queryset=FungiNotes.objects.all())
+        context["Fungi_Id"] = f.Fungi.id
+        context["Fungi_CommonName"] = f.Fungi.CommonName
+        context["Fungi_LatinName"] = f.Fungi.LatinName
+        context["Fungi_note"] = True
+        return context
 
     def get_success_url(self):
         return reverse('FungiDetail-Page', kwargs={'slug': self.object.slug})
 
+
+class FunginoteEdit(UpdateView):
+    model = FungiNotes
+    template_name = 'fungi_note_edit.html'
+    fields = ('Note', 'MonthFound', 'WhereFound', 'Environment')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # user = self.request.user
+        f = self.get_object(queryset=FungiNotes.objects.all())
+        context["Fungi_Id"] = f.Fungi.id
+        context["Fungi_CommonName"] = f.Fungi.CommonName
+        context["Fungi_LatinName"] = f.Fungi.LatinName
+        context["Fungi_note"] = True
+        return context
+
+
 def home(request):
     if request.user.is_authenticated:
         uid = request.user
-        # print('uid', uid)
-        # usershowsettings = ShowSearchFields.objects.get(user_id=request.user)
     else:
         uid = User.objects.get(username='GuestUser')
-        # print('uid', uid)
-        # usershowsettings = ShowSearchFields.objects.get(user_id=uid)
 
     context = {
         'fungis': Fungi.objects.all(),
@@ -80,7 +118,6 @@ def all_groups(request):
 
 def all_fungi(request):
     if request.user.is_authenticated:
-        print('uid:', request.user)
         uid = request.user
         usershowsettings = Show.objects.get(user_id=request.user)
     else:
@@ -145,7 +182,7 @@ def register(request):
         form = UserRegisterForm(request.POST)
         if form.is_valid():
             form.save()
-            #username = form.cleaned_data.get('username')
+            # username = form.cleaned_data.get('username')
             messages.success(request, f'Your account has been created! You are now able to log in')
             return redirect('login')
     else:
@@ -170,16 +207,12 @@ def index(request, fungi_id):
 class FungiEditView(UpdateView):
     model = Fungi
     template_name = 'fungi_edit.html'
-    # fields ='__all__'
     fields = ['CommonName', 'LatinName', 'Group', 'UKSpecies', 'Macromycetes', 'Comments']
 
 
 class FungiCreateView(CreateView):
     model = Fungi
     template_name = 'fungi_create.html'
-    # fields = ['CommonName','LatinName','Group']
-    # exclude = ['slug']
-    # fields ='__all__'
     fields = ['CommonName', 'LatinName', 'Group', 'UKSpecies', 'Macromycetes', 'Comments']
 
     def form_valid(self, form):
@@ -547,12 +580,7 @@ class FungiStatusView(SingleObjectMixin, FormView):
         # return reverse('FungiDetail-Page', kwargs={'pk': self.object.pk})
         return reverse('FungiDetail-Page', kwargs={'slug': self.object.slug})
 
-
-        return HttpResponseRedirect(self.get_success_url())
-
-    def get_success_url(self):
-        # return reverse('FungiDetail-Page', kwargs={'pk': self.object.pk})
-        return reverse('FungiDetail-Page', kwargs={'slug': self.object.slug})
+        # return HttpResponseRedirect(self.get_success_url())
 
 
 class FungiPoresView(SingleObjectMixin, FormView):
@@ -708,41 +736,6 @@ class FungiLinksView(SingleObjectMixin, FormView):
     def get_success_url(self):
         # return reverse('FungiDetail-Page', kwargs={'pk': self.object.pk})
         return reverse('FungiDetail-Page', kwargs={'slug': self.object.slug})
-
-
-
-
-
-
-class FungiPersonalNotesView(SingleObjectMixin, FormView):
-        model = Fungi
-        template_name = 'fungi_notes.html'
-
-        def get(self, request, *args, **kwargs):
-            self.object = self.get_object(queryset=Fungi.objects.all())
-            return super().get(request, *args, **kwargs)
-
-        def post(self, request, *args, **kwargs):
-            self.object = self.get_object(queryset=Fungi.objects.all())
-            return super().post(request, *args, **kwargs)
-
-        def get_form(self, form_class=None):
-            return FungiPersonalNotesFormset(**self.get_form_kwargs(), instance=self.object)
-
-        def form_valid(self, form):
-            form.save()
-
-            messages.add_message(
-                self.request,
-                messages.SUCCESS,
-                'Changes were saved.'
-            )
-
-            return HttpResponseRedirect(self.get_success_url())
-
-        def get_success_url(self):
-            # return reverse('FungiDetail-Page', kwargs={'pk': self.object.pk})
-            return reverse('FungiDetail-Page', kwargs={'slug': self.object.slug})
 
 
 class FungiRefsView(SingleObjectMixin, FormView):
